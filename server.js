@@ -18,6 +18,8 @@ mongoose.connect(process.env.DATABASE)
 app.use(cors());
 app.use(morgan("prod"));
 app.use(express.json());
+console.log('Auth JS Check 1');
+
 //route middleware
 readdirSync('./routes').map((r) => 
     app.use('/api', require(`./routes/${r}`))
@@ -25,7 +27,6 @@ readdirSync('./routes').map((r) =>
 
 
 const port = process.env.PORT || 8000;
-console.log('Auth JS Check 2');
 app.listen(port, ()=> console.log(`Server is running on http://localhost:${port}/`));
 
 } catch (error) {
