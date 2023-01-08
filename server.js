@@ -25,7 +25,7 @@ readdirSync('./routes').map((r) =>
 
 
 const port = process.env.PORT || 8000;
-
+console.log('Auth JS Check');
 app.listen(port, ()=> console.log(`Server is running on http://localhost:${port}/`));
 
 } catch (error) {
