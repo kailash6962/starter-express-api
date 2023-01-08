@@ -1,4 +1,4 @@
- import Customers from '../models/customers';
+ import Customers from '../models/Customers';
  import Organization from '../models/Organization';
  import Activitylog from '../models/Activitylog';
  const Vonage = require('@vonage/server-sdk');
