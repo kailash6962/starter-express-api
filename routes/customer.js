@@ -14,7 +14,7 @@ const {
     remove,
     update,
     createcode
-} = require("../controllers/customer");
+} = require("../controllers/Customer");
 
 router.post('/customers-create', requireSignin, formidable(), create);
 router.get('/customers-createcode', requireSignin, formidable(), createcode);

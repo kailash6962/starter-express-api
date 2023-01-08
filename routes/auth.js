@@ -15,7 +15,7 @@ import {
     sendotpmail,
     updatepassword,
     getuseraccesslinks,
-} from "../controllers/auth";
+} from "../controllers/Auth";
 
 router.post('/register', register);
 router.post('/login', login);
