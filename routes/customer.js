@@ -18,7 +18,7 @@ const {
 
 router.post('/customers-create', requireSignin, formidable(), create);
 router.get('/customers-createcode', requireSignin, formidable(), createcode);
-router.get('/customers-read', requireSignin, formidable() ,  readall);
+router.get('/customers-read',  readall);
 router.get('/customers-readone', requireSignin, formidable() ,  readone);
 router.post('/customers-update', requireSignin, formidable() ,  update);
 router.get('/customers-remove', requireSignin, formidable() ,  remove);
