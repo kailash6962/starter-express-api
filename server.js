@@ -18,7 +18,8 @@ console.log('Auth JS Check 1');
 //middleware
 app.use(cors());
 app.use(morgan("prod"));
-app.use(express.json());
+// app.use(express.json());
+app.use(express.raw());
 
 //route middleware
 readdirSync('./routes').map((r) => 

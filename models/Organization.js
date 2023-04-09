@@ -22,7 +22,6 @@ const OrganizationSchema = new Schema({
         required : 'Email is required',
         unique: true,
     },
-    
     profile_img:
     {
         data: Buffer,
@@ -41,6 +40,10 @@ const OrganizationSchema = new Schema({
         type: String,
     },
     custCode_prefix: {
+        type: String,
+        required: false,
+    },
+    invCode_prefix: {
         type: String,
         required: false,
     },
