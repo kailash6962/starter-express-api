@@ -10,8 +10,8 @@ var nodemailer = require('nodemailer');
 
 
 export const register = async (req,res) => {
-    console.log(req.body);
-    const { name, email, password, custCode_prefix, profile_img } = req.body;
+    console.log(req.fields);
+    const { name, email, password, custCode_prefix, profile_img } = req.fields;
     let token = Math.random().toString(36).substr(2)+Math.random().toString(36).substr(2);
 
     sendVerificationEmail(req.get('host'),email,token,name);
@@ -229,7 +229,7 @@ const generateOrgId = async () => {
 
 export const login = async (req,res) => {
     
-    const {email, password} = req.body;
+    const {email, password} = req.fields;
     try{
         let user = await User.findOne({ email }).exec();
 
@@ -301,9 +301,9 @@ export const verifyemail = async (req,res) => {
 
 //SEND OTP EMAIL
 export const sendotpmail = async (req,res) => {
-    console.log('body',req.body);
+    console.log('body',req.fields);
    
-     const {otp, email} = req.body;
+     const {otp, email} = req.fields;
     try{
         let user = await User.findOne({ email:email }).exec();
         
@@ -331,9 +331,9 @@ export const sendotpmail = async (req,res) => {
 
 //UPDATE PASSWORD
 export const updatepassword = async (req,res) => {
-    console.log('body',req.body);
+    console.log('body',req.fields);
    
-     const {otp, email, password} = req.body;
+     const {otp, email, password} = req.fields;
     try{
         let user = await User.findOne({ email:email,register_token:btoa(otp) }).exec();
        

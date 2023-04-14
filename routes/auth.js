@@ -17,11 +17,11 @@ import {
     getuseraccesslinks,
 } from "../controllers/Auth";
 
-router.post('/register', register);
-router.post('/login', login);
-router.post('/send-verificationmail', sendverifyemail);
-router.post('/send-otpmail', sendotpmail);
-router.post('/updatepassword', updatepassword);
+router.post('/register',formidable(), register);
+router.post('/login', formidable(),login);
+router.post('/send-verificationmail', formidable(),sendverifyemail);
+router.post('/send-otpmail', formidable(),sendotpmail);
+router.post('/updatepassword', formidable(),updatepassword);
 
 router.get('/verifyemail', verifyemail);
 router.get('/getuseraccesslinks', requireSignin, formidable(), getuseraccesslinks);
