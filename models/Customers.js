@@ -25,11 +25,9 @@ const CustomerSchema = new Schema({
     email: {
         type: String,
         trim: true,
-        unique: true,
     },
     mobile: {
         type: String,
-        unique: true,
         trim: true,
     },
     UserId: {
