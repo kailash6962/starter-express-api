@@ -6,7 +6,6 @@ const InvoicePaySchema = new Schema({
     PaymentId: {
         type: String,
         trim: true,
-        unique: true,
         required : 'PaymentId is required'
     },
     PaymentDate: {

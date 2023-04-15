@@ -11,9 +11,9 @@ const app = express();
 
 //db connection
 mongoose.connect(process.env.DATABASE)
-.then(() => console.log('DB Connected 2'))
+.then(() => console.log('DB Connected'))
 .catch((err) => console.log('DB Connection Error: ', err));
-console.log('Auth JS Check 1');
+console.log('Initiating Routes');
 
 //middleware
 app.use(cors());
@@ -26,10 +26,9 @@ readdirSync('./routes').map((r) =>
     app.use('/api', require(`./routes/${r}`))
 );
 
-
 const port = process.env.PORT || 8000;
 app.listen(port, ()=> console.log(`Server is running on http://localhost:${port}/`));
-
+console.log('*** Server is ready to Use ***');
 } catch (error) {
     console.log(error);
 }

@@ -2,6 +2,7 @@ import Customers from "../models/Customers";
 import { successResponse, failureResponse } from "../utilities/Response";
 import Invoice from "../models/Invoice";
 import InvoiceItems from "../models/InvoiceItems";
+import { getUserDataByToken } from "../controllers/Auth";
 import Organization from "../models/Organization";
 import InvoicePay from "../models/InvoicePay";
 import InvoicePayDetail from "../models/InvoicePayDetail";
@@ -17,7 +18,13 @@ var Validator = require('validatorjs');
 //SAVE NEW
 export const create = async (req, res, next) => {
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    var userId = userData.UserId;
+
     let fields = req.fields;
+    fields.UserId = userId;
+    fields.OrgId = userOrgId;
     let org = await Organization.findOne({
       OrgId: fields.OrgId,
     }).exec();
@@ -144,9 +151,10 @@ export const create = async (req, res, next) => {
 
 //READ ALL
 export const readall = async (req, res) => {
-  let SessionUser = req.query.SessionUser;
   try {
-    let data = await InvoicePay.find({ OrgId: SessionUser }).exec();
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    let data = await InvoicePay.find({ OrgId: userOrgId }).exec();
     res.json(data);
   } catch (err) {
     console.log(err);
@@ -160,12 +168,14 @@ export const readall = async (req, res) => {
 export const readone = async (req, res) => {
   console.log(req.fields);
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
     let invPay = await InvoicePay.find({
-      OrgId: req.fields.OrgId,
+      OrgId: userOrgId,
       PaymentId: req.fields.PaymentId,
     }).exec();
     var invpayDetails = await InvoicePayDetail.find({
-      OrgId: req.fields.OrgId,
+      OrgId: userOrgId,
       PaymentId: req.fields.PaymentId,
     }).exec();
     var resdata = {};
@@ -183,22 +193,24 @@ export const readone = async (req, res) => {
 //DELETE
 export const remove = async (req, res) => {
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
     let getInvpaydetail = await InvoicePayDetail.find({
-      OrgId: req.fields.OrgId,
+      OrgId: userOrgId,
       PaymentId: req.fields.PaymentId,
     }).exec(function(err, docs) {
       console.log("Found the following records");
       // Iterate over the result and print each document
       docs.forEach(async doc =>  {
       let invoice = await Invoice.findOne({  
-        OrgId: req.fields.OrgId,
+        OrgId: userOrgId,
         Invid: doc.Invid,
        })
       .sort({ Invid: -1 }).limit(1)
       .exec();
       var updatedAmt = (invoice.AmtPaid-parseFloat(doc.AmtPaid))
       let inv = await Invoice.updateOne({
-        OrgId: req.fields.OrgId,
+        OrgId: userOrgId,
         Invid: doc.Invid,
       },{ 
         AmtPaid: updatedAmt,
@@ -208,7 +220,7 @@ export const remove = async (req, res) => {
       });
     });
     await InvoicePay.deleteOne({
-      OrgId: req.fields.OrgId,
+      OrgId: userOrgId,
       PaymentId: req.fields.PaymentId,
     }).exec();
    
@@ -224,8 +236,10 @@ export const remove = async (req, res) => {
 //GENERATE INVOICE CODE
 export const createcode = async (req, res) => {
   try {
-    var invno = await generatecode(req.fields.SessionUser);
-    res.status(200).json(invno);
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    var invno = await generatecode(userOrgId);
+    res.status(200).json(successResponse(invno));
   } catch (err) {
     console.log(err);
     res.status(400).json({

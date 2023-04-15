@@ -1,10 +1,15 @@
 import Customers from "../models/Customers";
 import { successResponse, failureResponse } from "../utilities/Response";
+import { getUserDataByToken } from "../controllers/Auth";
 import Invoice from "../models/Invoice";
 import InvoiceItems from "../models/InvoiceItems";
 import Organization from "../models/Organization";
 import Staff from "../models/Staff";
 import Activitylog from "../models/Activitylog";
+import User from '../models/user';
+
+const jwt = require('jsonwebtoken');
+
 const Vonage = require("@vonage/server-sdk");
 
 const Models = require("../models/Invoice");
@@ -14,7 +19,12 @@ var Validator = require('validatorjs');
 //SAVE NEW
 export const create = async (req, res) => {
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    var userId = userData.UserId;
     let fields = req.fields;
+    fields.UserId = userId;
+    fields.OrgId = userOrgId;
     let customers = await Customers.findOne({
       OrgId: fields.OrgId,
       Custid: fields.custCode,
@@ -79,17 +89,23 @@ export const create = async (req, res) => {
 //UPDATE
 export const update = async (req, res) => {
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    var userId = userData.UserId;
     let fields = req.fields;
+    fields.OrgId = userOrgId;
+    fields.UserId = userId;
+    fields.Status = paymentStatus(fields.AmtTotal,fields.AmtPaid);
     let customers = await Customers.findOne({
-      OrgId: fields.OrgId,
+      OrgId: userOrgId,
       Custid: fields.custCode,
     }).exec();
     let org = await Organization.findOne({
-      OrgId: fields.OrgId,
+      OrgId: userOrgId,
     }).exec();
     let invCheck = await Invoice.findOne({
       Invid: fields.Invid,
-      OrgId: fields.OrgId,
+      OrgId: userOrgId,
     }).exec();
     if (customers && org && invCheck) {
       let data = fields;
@@ -103,7 +119,6 @@ export const update = async (req, res) => {
       SubTotal: 'required',
       AmtTotal: 'required',
       UserId: 'required',
-      OrgId: 'required',
     };
     
 
@@ -115,18 +130,18 @@ export const update = async (req, res) => {
     { 
       let inv = await Invoice.updateOne({
         Invid: fields.Invid,
-        OrgId:fields.OrgId,
+        OrgId:userOrgId,
       },fields);
       let deleteinvitems = await InvoiceItems.remove({
         Invid: fields.Invid,
-        OrgId:fields.OrgId,
+        OrgId:userOrgId,
       }).exec();
       var InvItems = fields.InvoiceItems;
       for (let i = 0; i < Object.keys(InvItems).length; ++i) {
         console.log(InvItems[i]);
         InvItems[i].Invid = fields.Invid;
         InvItems[i].UserId = fields.UserId;
-        InvItems[i].OrgId = fields.OrgId;
+        InvItems[i].OrgId = userOrgId;
         let newinvitems = new InvoiceItems(InvItems[i]);
         newinvitems.save();
       }
@@ -143,9 +158,27 @@ export const update = async (req, res) => {
 
 //READ ALL
 export const readall = async (req, res) => {
-  let SessionUser = req.query.SessionUser;
+  
+  var userData = await getUserDataByToken(req);
+  console.log('getUserDataByToken ',userData);
   try {
-    let data = await Invoice.find({ OrgId: SessionUser }).exec();
+    let data = await Invoice.aggregate([
+      {
+        $match:{"OrgId" : userData.OrgId}
+      }, 
+      {
+        $lookup:
+        {
+          from: 'customers',
+          localField: 'custCode',
+          foreignField: 'Custid',
+          "pipeline": [
+            { "$match": {"OrgId" : userData.OrgId} },
+          ],
+          as: 'CustomerData'
+        }
+      }
+  ]).exec();
     res.json(data);
   } catch (err) {
     console.log(err);
@@ -157,14 +190,30 @@ export const readall = async (req, res) => {
 
 //READ ONE
 export const readone = async (req, res) => {
-  console.log(req.fields);
+  var userData = await getUserDataByToken(req);
   try {
-    let inv = await Invoice.find({
-      OrgId: req.fields.OrgId,
-      Invid: req.fields.Invid,
-    }).exec();
+    let inv = await Invoice.aggregate([
+      {
+        $match:{
+          "OrgId" : userData.OrgId,
+          "Invid" : req.fields.Invid,
+        }
+      }, 
+      {
+        $lookup:
+        {
+          from: 'customers',
+          localField: 'custCode',
+          foreignField: 'Custid',
+          "pipeline": [
+            { "$match": {"OrgId" : userData.OrgId} },
+          ],
+          as: 'CustomerData'
+        }
+      }
+  ]).exec();
     var invitems = await InvoiceItems.find({
-      OrgId: req.fields.OrgId,
+      OrgId: userData.OrgId,
       Invid: req.fields.Invid,
     }).exec();
     var resdata = {};
@@ -198,12 +247,13 @@ export const remove = async (req, res) => {
 //GENERATE INVOICE CODE
 export const createcode = async (req, res) => {
   try {
-    console.log(req.query.SessionUser);
-    let invoice = await Invoice.findOne({ OrgId: req.query.SessionUser })
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    let invoice = await Invoice.findOne({ OrgId: userOrgId })
       .sort({ Invid: -1 }).limit(1)
       .exec(); //LAST CODE
     let getuser = await Organization.findOne({
-      OrgId: req.query.SessionUser,
+      OrgId: userOrgId,
     }).exec(); //GET PREFIX FROM USER
     console.log(invoice);
     let CODE_PREFIX = getuser.invCode_prefix;
@@ -216,7 +266,7 @@ export const createcode = async (req, res) => {
       var code = String(1).padStart(6, "0"); //NEW CUSTCODE
     }
     let invno = (CODE_PREFIX ? CODE_PREFIX : "INV") + code; //NEW CUSTCODE
-    res.status(200).json(invno);
+    res.status(200).json(successResponse(invno));
   } catch (err) {
     console.log(err);
     res.status(400).json({

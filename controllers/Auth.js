@@ -365,3 +365,16 @@ export const getuseraccesslinks = async (req,res) => {
         res.status(200).send(userRole.AccessLinks);
     }
 }
+//PERMISSION LINKS
+export async function getUserDataByToken(req){
+    var token = req.headers['authorization'];
+    token = token.substring(7);
+    const verify = await jwt.verify(token,process.env.JWT_SECRET);
+        var userData = await User.findById(verify._id,
+          {
+            "profile_img":0,
+            "password":0,
+            "register_token":0
+          });
+    return userData;
+}

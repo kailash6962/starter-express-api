@@ -20,7 +20,7 @@ const {
 
 router.post('/invoice-create', requireSignin, formidable(), create);
 router.get('/invoice-createcode', requireSignin, formidable(), createcode);
-router.get('/invoice-read', requireSignin, formidable(),  readall);
+router.post('/invoice-read', requireSignin, formidable(),  readall);
 router.post('/invoice-readone', requireSignin, formidable() ,  readone);
 router.post('/invoice-update', requireSignin, formidable() ,  update);
 // router.get('/customers-remove', requireSignin, formidable() ,  remove);
