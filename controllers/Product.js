@@ -1,4 +1,5 @@
 import Product from '../models/Product';
+import { getUserDataByToken } from "../controllers/Auth";
 
  export const create = async (req,res) => {
         console.log("req.body",req.fields);
@@ -23,10 +24,10 @@ import Product from '../models/Product';
 
 //READ ALL
 export const readall = async (req,res) => {
-  let SessionUser = req.query.SessionUser;
-  console.log(SessionUser);
+  var userData = await getUserDataByToken(req);
+  var userOrgId = userData.OrgId;
   try {
-     let product = await Product.find({OrgId:SessionUser}).exec();
+     let product = await Product.find({OrgId:userOrgId}).exec();
      console.log(product);
        res.json(product);
   } catch (err) {

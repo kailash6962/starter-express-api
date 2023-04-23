@@ -2,6 +2,7 @@
  import Organization from '../models/Organization';
  import Activitylog from '../models/Activitylog';
  const Vonage = require('@vonage/server-sdk');
+ import { getUserDataByToken } from "../controllers/Auth";
 
  //SAVE NEW
  export const create = async (req,res) => {
@@ -77,9 +78,16 @@
 
 //READ ALL
 export const readall = async (req,res) => {
-        let SessionUser = req.query.SessionUser;
   try {
-     let customers = await Customers.find({OrgId:SessionUser}).exec();
+    let fields = req.fields;
+    if(fields.fields!=undefined)
+    var selectField = fields.fields;
+    else
+    var selectField = {};
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+     let customers = await Customers.find({OrgId:userOrgId},selectField).exec();
+     console.log(customers);
        res.json(customers);
   } catch (err) {
     console.log(err);

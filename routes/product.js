@@ -17,7 +17,7 @@ const {
 } = require("../controllers/Product");
 
 router.post('/products-create', requireSignin, formidable(), create);
-router.get('/products-read', requireSignin, formidable(), readall);
+router.post('/products-read', requireSignin, formidable(), readall);
 router.get('/products-readone', requireSignin, formidable() ,  readone);
 router.get('/products-createcode', requireSignin, formidable(), createcode);
 router.get('/products-remove', requireSignin, formidable() ,  remove);
