@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const {Schema} = mongoose;
 
 const InvoiceItemsSchema = new Schema({
-    prodCode: {
+    prodName: {
         type: String,
         trim: true
     },
