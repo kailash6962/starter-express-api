@@ -59,7 +59,7 @@ export const create = async (req, res) => {
     else   
     { 
     if (customers && org && !(parseFloat(fields.AmtTotal)<parseFloat(fields.AmtPaid))) {
-      fields.Status = paymentStatus(fields.AmtTotal,fields.AmtPaid);
+      fields.Status = (fields.Status=='Draft')?"Draft":paymentStatus(fields.AmtTotal,fields.AmtPaid);
       let invoice = new Invoice(fields);
       var InvItems = fields.InvoiceItems;
       for (let i = 0; i < Object.keys(InvItems).length; ++i) {
