@@ -23,7 +23,6 @@ const InvoiceItemsSchema = new Schema({
     unit: {
         type: String,
         trim: true,
-        required : 'unit is required'
     },
     quantity: {
         type: String,

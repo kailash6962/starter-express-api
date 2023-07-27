@@ -54,7 +54,7 @@ const InvoiceSchema = new Schema({
         trim: true
     },
     Adjustment: {
-        type: String,
+        type: Object,
         trim: true,
     },
     AmtTotal: {
