@@ -74,7 +74,7 @@ export const create = async (req, res) => {
         if (err) {
           console.log("saving err => ", err);
           res.status(500).send(failureResponse(err.message));
-        } else res.json(successResponse("Invoice created successfully"));
+        } else res.json(successResponse({invId:result.Invid,message:"Invoice created successfully"}));
       });
     } else res.status(500).send(failureResponse("Invalid Input"));
   }

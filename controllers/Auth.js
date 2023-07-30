@@ -53,7 +53,7 @@ export const register = async (req,res) => {
             UserId:NewUserid,
             OrgId:Orgid,
             ReadOnly:true,
-            AccessLinks:(["CustomerList","CustomerCreate","CustomerUpdate","CustomerDelete","ProductList","ProductCreate","ProductUpdate","ProductDelete"])
+            AccessLinks:(['CustomerUpdate', 'CustomerDelete', 'ProductList', 'ProductCreate', 'ProductUpdate', 'ProductDelete', 'InvoiceList', 'InvoiceUpdate', 'InvoiceDelete', 'ExpenseList', 'ExpenseCreate', 'StaffCreate', 'StaffList', 'ExpenseUpdate', 'StaffUpdate', 'StaffDelete', 'ExpenseDelete', 'UserRolesUpdate', 'UserRolesCreate', 'OrganizationUpdate', 'AccountUpdate', 'UserRolesDelete', 'InvoiceCreate', 'ReportCreate', 'Report_CustomerBalances', 'UserRolesList', 'AccountView', 'OrganizationView', 'CustomerCreate', 'CustomerList'])
           });
 
         const user = new User(object);

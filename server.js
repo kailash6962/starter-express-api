@@ -10,7 +10,7 @@ try{
 const app = express();
 
 //db connection
-mongoose.connect(process.env.DATABASE)
+mongoose.connect(process.env.DEV_DATABASE)
 .then(() => console.log('DB Connected'))
 .catch((err) => console.log('DB Connection Error: ', err));
 console.log('Initiating Routes');
