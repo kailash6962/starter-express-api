@@ -52,7 +52,7 @@ export const create = async (req, res, next) => {
     };
     let validation = new Validator(data, rules);
     if(validation.fails())
-    res.status(500).send(validation.errors);
+    return res.status(200).send(validation.errors);
     else   
     { 
       var generatedPayId = await generatecode(req.fields.OrgId);

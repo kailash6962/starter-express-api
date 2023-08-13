@@ -7,7 +7,7 @@ export function failureResponse (res) {
     return response;
 }
 export function errorResponse (res) {
-    var response = {errors:res};
+    var response = {status:"error",errors:res};
     return response;
 }
  
