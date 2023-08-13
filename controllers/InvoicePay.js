@@ -1,5 +1,5 @@
 import Customers from "../models/Customers";
-import { successResponse, failureResponse } from "../utilities/Response";
+import { successResponse, failureResponse, errorResponse } from "../utilities/Response";
 import Invoice from "../models/Invoice";
 import InvoiceItems from "../models/InvoiceItems";
 import { getUserDataByToken } from "../controllers/Auth";
@@ -36,14 +36,13 @@ export const create = async (req, res, next) => {
       res.status(500).send(failureResponse("Duplicate Payment Id"));
     return next();
     }
-    console.log("Creating payment");
-
     //validation
     let data = fields;
     
     let rules = {
       PaymentId: 'required',
       AmtPaid: 'required',
+      CustCode: 'required',
       PaymentDate: 'required',
       PaymentMode: 'required',
       PaymentBy: 'required',
@@ -53,17 +52,15 @@ export const create = async (req, res, next) => {
     };
     let validation = new Validator(data, rules);
     if(validation.fails())
-    res.status(200).send(validation.errors);
+    res.status(500).send(validation.errors);
     else   
     { 
       var generatedPayId = await generatecode(req.fields.OrgId);
       var paymentDetail = fields.paymentDetail;
       var detailLength = Object.keys(paymentDetail).length;
-      console.log('paymentDetail count ',detailLength);
     if (org && (parseFloat(fields.AmtPaid)>0)) {
       var remainingAmt = parseFloat(fields.AmtPaid);
       for(let i=0;i<detailLength;i++){
-        console.log(paymentDetail[i].InvId);
         let pendingInv = await Invoice.findOne({
           Invid: paymentDetail[i].InvId,
           OrgId: fields.OrgId,
@@ -133,11 +130,15 @@ export const create = async (req, res, next) => {
           });
         } else{
           responseData.message = "You don't have pending invoice to pay";
-          res.json(successResponse(responseData))
+          res.status(500).send(errorResponse({
+            Invoices:'Invoices is not selected'
+          }));
           return next();
         }
             
-    } else{ res.status(500).send(failureResponse("Invalid Input")); return next();}
+    } else{ res.status(500).send({errors:{
+      Amount:'Invalid Amount'
+    }}); return next();}
     
   }
   } catch (err) {
@@ -152,13 +153,35 @@ export const create = async (req, res, next) => {
 //READ ALL
 export const readall = async (req, res) => {
   try {
+    var filter = {};
     var userData = await getUserDataByToken(req);
     var userOrgId = userData.OrgId;
-    let data = await InvoicePay.find({ OrgId: userOrgId }).exec();
-    res.json(data);
+    // let data = await InvoicePay.find({ OrgId: userOrgId }).exec();
+    let data = await InvoicePay.aggregate([
+      {
+        $match:{
+          "OrgId" : userData.OrgId,
+          ...filter
+        }
+      }, 
+      {
+        $lookup:
+        {
+          from: 'customers',
+          localField: 'CustCode',
+          foreignField: 'Custid',
+          "pipeline": [
+            { "$match": {"OrgId" : userData.OrgId} },
+          ],
+          as: 'CustomerData'
+        }
+      },
+      { $sort: { createdAt: -1 } }, // 1 for ascending, -1 for descending
+  ]).exec();
+    res.status(200).json(data);
   } catch (err) {
     console.log(err);
-    res.status(400).json({
+    res.status(500).json({
       err: err.message,
     });
   }
@@ -166,7 +189,6 @@ export const readall = async (req, res) => {
 
 //READ ONE
 export const readone = async (req, res) => {
-  console.log(req.fields);
   try {
     var userData = await getUserDataByToken(req);
     var userOrgId = userData.OrgId;
@@ -199,8 +221,6 @@ export const remove = async (req, res) => {
       OrgId: userOrgId,
       PaymentId: req.fields.PaymentId,
     }).exec(function(err, docs) {
-      console.log("Found the following records");
-      // Iterate over the result and print each document
       docs.forEach(async doc =>  {
       let invoice = await Invoice.findOne({  
         OrgId: userOrgId,

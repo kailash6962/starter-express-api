@@ -63,7 +63,6 @@ export const create = async (req, res) => {
       let invoice = new Invoice(fields);
       var InvItems = fields.InvoiceItems;
       for (let i = 0; i < Object.keys(InvItems).length; ++i) {
-        console.log(InvItems[i]);
         InvItems[i].Invid = fields.Invid;
         InvItems[i].UserId = fields.UserId;
         InvItems[i].OrgId = fields.OrgId;
@@ -157,14 +156,21 @@ export const update = async (req, res) => {
 };
 
 //READ ALL
-export const readall = async (req, res) => {
+export const read = async (req, res) => {
   
   var userData = await getUserDataByToken(req);
-  console.log('getUserDataByToken ',userData);
+  var filter = {};
+  if(req.fields.custCode)
+  filter.custCode = req.fields.custCode;
+  if(req.fields.Status=='Pending')
+  filter.Status = {$ne:'FullyPaid'};
   try {
     let data = await Invoice.aggregate([
       {
-        $match:{"OrgId" : userData.OrgId}
+        $match:{
+          "OrgId" : userData.OrgId,
+          ...filter
+        }
       }, 
       {
         $lookup:
@@ -177,7 +183,8 @@ export const readall = async (req, res) => {
           ],
           as: 'CustomerData'
         }
-      }
+      },
+      { $sort: { createdAt: -1 } }, // 1 for ascending, -1 for descending
   ]).exec();
     res.json(data);
   } catch (err) {
@@ -255,7 +262,6 @@ export const createcode = async (req, res) => {
     let getuser = await Organization.findOne({
       OrgId: userOrgId,
     }).exec(); //GET PREFIX FROM USER
-    console.log(invoice);
     let CODE_PREFIX = getuser.invCode_prefix;
     if (invoice) {
       var code = String(parseInt(invoice.Invid.match(/(\d+)/)[0]) + 1).padStart(

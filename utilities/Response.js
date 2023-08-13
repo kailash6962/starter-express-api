@@ -6,4 +6,8 @@ export function failureResponse (res) {
     var response = {"code":500,"status":"failure","data":res};
     return response;
 }
+export function errorResponse (res) {
+    var response = {errors:res};
+    return response;
+}
  
