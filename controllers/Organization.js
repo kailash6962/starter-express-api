@@ -5,10 +5,8 @@ var path = require('path');
 var fs = require('fs');
 
 
- export const update = async (req,res) => {
-        //console.log("req.body",req.file);
-        
-         let OrgId = req.body.OrgId;
+ export const update = async (req,res) => {        
+  let OrgId = req.body.OrgId;
    try {
     let fields = req.body;
     var obj = {
@@ -45,8 +43,6 @@ export const readall = async (req,res) => {
   let SessionUser = req.query.OrgId;
   try {
      let userdata = await Organization.find({OrgId:req.query.OrgId}).exec();
-    //  const responsedata.name = userdata[0].name;
-    //console.log(userdata[0].profile_img.data);
     var obj = {
       OrgId: userdata[0].OrgId,
       name: userdata[0].name,

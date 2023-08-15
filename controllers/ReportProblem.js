@@ -1,8 +1,6 @@
 import ErrorLogs from '../models/ErrorLogs';
 import { getUserDataByToken } from "../controllers/Auth";
 
-var path = require('path');
-var fs = require('fs');
 var nodemailer = require('nodemailer');
 
 export const report = async (req,res) => {
@@ -11,7 +9,7 @@ export const report = async (req,res) => {
     var userOrgId = userData.OrgId;
     var userId = userData.UserId;
     let saveLogData = {
-      ErrorReportId:'ERR0001',
+      ErrorReportId: await createcode(),
       ErrorData:req.fields,
       UserId:userId,
       OrgId:userOrgId,
@@ -21,7 +19,7 @@ export const report = async (req,res) => {
       if (err) {
         console.log("saving err => ", err);
       }
-      sendErrorEmailtoAdministrator(process.env.ADMIN_EMAIL_ADDRESS,process.env.ADMIN_NAME)
+      sendErrorEmailtoAdministrator(process.env.ADMIN_EMAIL_ADDRESS,process.env.ADMIN_NAME,result)
       return res.status(200).json("Report sent successfully");
     });
   } catch (err) {
@@ -32,8 +30,41 @@ export const report = async (req,res) => {
   }
 };
 
-export const sendErrorEmailtoAdministrator = (email,name) => {
-    
+export const sendErrorEmailtoAdministrator = (email,name,errorJson) => {
+  let jsonData = errorJson.ErrorData;
+  const formattedTree = `
+  <ul>
+      <li>Collection Info
+          <ul>
+              <li>ErrorId: ${errorJson.ErrorReportId}</li>
+              <li>UserId: ${errorJson.UserId}</li>
+              <li>OrgId: ${errorJson.OrgId}</li>
+          </ul>
+      </li>
+      <li>Browser Info
+          <ul>
+              <li>User Agent: ${jsonData.browserInfo.userAgent}</li>
+              <li>Language: ${jsonData.browserInfo.language}</li>
+              <li>Platform: ${jsonData.browserInfo.platform}</li>
+          </ul>
+      </li>
+      <li>Screen Info
+          <ul>
+              <li>Width: ${jsonData.screenInfo.width}</li>
+              <li>Height: ${jsonData.screenInfo.height}</li>
+          </ul>
+      </li>
+      <li>Error
+          <ul>
+              <li>Message: ${jsonData.error.message}</li>
+              <li>Status: ${jsonData.error.status}</li>
+              <!-- Add more error-related information as needed -->
+          </ul>
+      </li>
+      <!-- Add more sections like 'response' and 'userToken' -->
+  </ul>
+`;
+
       var transport = nodemailer.createTransport({
           host: process.env.EMAIL_HOST,
           port: process.env.EMAIL_PORT,
@@ -52,21 +83,11 @@ export const sendErrorEmailtoAdministrator = (email,name) => {
           to: email,
           subject: 'New Error Reported in KailashInvoiceApp',
           html: `<h4>Hi ${name},</h4>
-          <p>Unknown Error occured in Invoice application</p> 
-          <br><a href='#' style='
-              background-color: #4286f5;
-              border: none;
-              color: white;
-              padding: 15px 32px;
-              text-align: center;
-              text-decoration: none;
-              display: inline-block;
-              font-size: 16px;
-              margin: 4px 2px;
-              cursor: pointer;
-            '>
-            Show Error Detail
-            </a>`
+          <p>Unknown Error occured in Invoice application</p><br>
+          ${formattedTree}
+          <br><p>
+            Above data is just for short information. Show more detail in errorLog database collection
+            </p>`
       };
   
       transport.sendMail(mailOptions, function(error, info){
@@ -80,3 +101,19 @@ export const sendErrorEmailtoAdministrator = (email,name) => {
       });
   
 }
+
+//GENERATE CUSTOMER CODE
+export const createcode = async () => {
+  try {
+    let PREFIX = 'ERR';
+    let errorLogs = await ErrorLogs.find({}).sort({ErrorReportId:-1}).limit(1).exec();
+    if(errorLogs.length>0)
+     var ecode = (String(parseInt(errorLogs[0].ErrorReportId.match(/(\d+)/)[0])+1).padStart(6, '0'));
+    else
+      var ecode = (String(1).padStart(6, '0'));
+    let code = PREFIX+ecode;
+    return code;
+  } catch (err) {
+    return Math.floor(10000000 + Math.random() * 90000000);
+  }
+};

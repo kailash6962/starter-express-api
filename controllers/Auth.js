@@ -10,7 +10,6 @@ var nodemailer = require('nodemailer');
 
 
 export const register = async (req,res) => {
-    console.log(req.fields);
     const { name, email, password, custCode_prefix, profile_img } = req.fields;
     let token = Math.random().toString(36).substr(2)+Math.random().toString(36).substr(2);
 
