@@ -99,9 +99,9 @@ export const readall = async (req,res) => {
 
 //READ ONE
 export const readone = async (req,res) => {
-        let SessionUser = req.query.SessionUser;
-        console.log(req.query);
   try {
+    var userData = await getUserDataByToken(req);
+    var SessionUser = userData.OrgId;
      let customers = await Customers.find({
        OrgId:SessionUser,
        Custid:req.query.Custid,
