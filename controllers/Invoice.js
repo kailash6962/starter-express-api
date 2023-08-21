@@ -106,6 +106,8 @@ export const update = async (req, res) => {
       Invid: fields.Invid,
       OrgId: userOrgId,
     }).exec();
+    if(parseFloat(invCheck.AmtPaid)>parseFloat(fields.AmtTotal))
+    return res.status(200).send(failureResponse({message:"Paid amount is greater than Invoice amount. Please Check and Try again"}));
     if (customers && org && invCheck) {
       let data = fields;
     
@@ -124,7 +126,7 @@ export const update = async (req, res) => {
     let validation = new Validator(data, rules);
     
     if(validation.fails())
-    res.status(200).send(validation.errors);
+    return res.status(200).send(failureResponse(validation.errors));
     else   
     { 
       let inv = await Invoice.updateOne({

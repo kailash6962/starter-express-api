@@ -57,6 +57,10 @@ const InvoiceSchema = new Schema({
         type: Object,
         trim: true,
     },
+    Discount: {
+        type: Number,
+        trim: true,
+    },
     AmtTotal: {
         type: String,
         trim: true,
