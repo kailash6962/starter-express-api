@@ -16,10 +16,15 @@ const ProductSchema = new Schema({
         type: String,
         trim: true,
     },
-    price: {
+    costPrice: {
         type: String,
         trim: true,
-        required : 'price is required'
+        required : 'costPrice is required'
+    },
+    sellingPrice: {
+        type: String,
+        trim: true,
+        required : 'costPrice is required'
     },
     unit: {
         type: String,

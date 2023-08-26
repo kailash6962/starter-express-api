@@ -9,16 +9,8 @@ var fs = require('fs');
   let OrgId = req.body.OrgId;
    try {
     let fields = req.body;
-    var obj = {
-      name: req.body.name,
-      email: req.body.email,
-      custCode_prefix: req.body.custCode_prefix,
-      company_name: req.body.company_name,
-      mobile: req.body.mobile,
-      Address: req.body.Address,
-      Industry: req.body.Industry,
-    }
-    
+    var obj = fields;
+console.log('obj :11', obj);
     if(req.file!=undefined){
       obj.profile_img = {
       data: fs.readFileSync(path.join(__dirname + '/../uploads/' + req.file.filename)),
@@ -42,22 +34,23 @@ var fs = require('fs');
 export const readall = async (req,res) => {
   let SessionUser = req.query.OrgId;
   try {
-     let userdata = await Organization.find({OrgId:req.query.OrgId}).exec();
+     let userdata = await Organization.find({OrgId:req.query.OrgId}).findOne();
     var obj = {
-      OrgId: userdata[0].OrgId,
-      name: userdata[0].name,
-      email: userdata[0].email,
-      custCode_prefix: userdata[0].custCode_prefix,
-      company_name: userdata[0].company_name,
-      mobile: userdata[0].mobile,
-      Address: userdata[0].Address,
-      Industry: userdata[0].Industry,
-      imgdata: ((userdata[0].profile_img.data==null)?null:userdata[0].profile_img.data.toString('base64'))
+      OrgId: userdata.OrgId,
+      name: userdata.name,
+      email: userdata.email,
+      custCode_prefix: userdata.custCode_prefix,
+      company_name: userdata.company_name,
+      mobile: userdata.mobile,
+      gstin: userdata.gstin,
+      Address: userdata.Address,
+      Industry: userdata.Industry,
+      imgdata: ((userdata.profile_img.data==null)?null:userdata.profile_img.data.toString('base64'))
     }
-       res.status(200).json(obj);
+      return res.status(200).json(obj);
   } catch (err) {
     console.log(err);
-    res.status(400).json({  
+    return res.status(400).json({  
       err: err.message,
     });
   }

@@ -31,6 +31,10 @@ const OrganizationSchema = new Schema({
     {
         type: String,
     },
+    gstin:
+    {
+        type: String,
+    },
     mobile:
     {
         type: String,
