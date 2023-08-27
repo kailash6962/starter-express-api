@@ -1,9 +1,27 @@
 import Product from '../models/Product';
 import { getUserDataByToken } from "../controllers/Auth";
+var Validator = require('validatorjs');
 
  export const create = async (req,res) => {
-        console.log("req.body",req.fields);
   try {
+    let data = req.fields;
+    let rules = {
+      ProdId: "required",
+      prodName: "required",
+      costPrice: "required",
+      sellingPrice: "required",
+      unit: "required",
+      stockCounts: "integer",
+      Category: "required",
+      minimumStockCounts: "integer",
+      Type: "required",
+      wholeSaleCount: "integer",
+      wholeSalePrice: "integer",
+      };
+    let validation = new Validator(data, rules);
+    if(validation.fails())
+    return res.status(200).send(validation.errors);
+    else{
     var userData = await getUserDataByToken(req);
     var userOrgId = userData.OrgId;
     var userId = userData.UserId;
@@ -15,13 +33,14 @@ import { getUserDataByToken } from "../controllers/Auth";
     product.save((err, result) => {
       if (err) {
         console.log("saving Product err => ", err);
-        res.status(400).send(err.message);
+        res.status(500).send(err.message);
       }
       res.json(result);
     });
+    }
   } catch (err) {
     console.log(err);
-    res.status(400).json({
+    res.status(500).json({
       err: err.message,
     });
   }

@@ -12,13 +12,23 @@ const CustomerSchema = new Schema({
         trim: true,
         required : 'Name is required'
     },
-    AddrLine1: {
+    Type: {
         type: String,
+        trim: true,
+        required : 'Name is required'
+    },
+    custDisplayName: {
+        type: String,
+        trim: true,
+        required : 'DisplayName is required'
+    },
+    BillingAddress: {
+        type: Map,
         trim: true,
         required : 'Addr 1 is required'
     },
-    AddrLine2: {
-        type: String,
+    ShippingAddress: {
+        type: Map,
         trim: true,
         required : 'Addr 2 is required'
     },
@@ -27,6 +37,26 @@ const CustomerSchema = new Schema({
         trim: true,
     },
     mobile: {
+        type: String,
+        trim: true,
+    },
+    openingBalance: {
+        type: Number,
+        trim: true,
+    },
+    openingBalanceType: {
+        type: String,
+        trim: true,
+    },
+    openingAsOn: {
+        type: Date,
+        trim: true,
+    },
+    creditLimit: {
+        type: Number,
+        trim: true,
+    },
+    gstin: {
         type: String,
         trim: true,
     },

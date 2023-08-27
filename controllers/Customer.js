@@ -3,7 +3,7 @@
  import Activitylog from '../models/Activitylog';
  const Vonage = require('@vonage/server-sdk');
  import { getUserDataByToken } from "../controllers/Auth";
-
+ var Validator = require('validatorjs');
  //SAVE NEW
  export const create = async (req,res) => {
 
@@ -32,22 +32,35 @@
 
         console.log("req.body",req.fields);
   try {
+    let data = req.fields;
+    let rules = {
+      Custid: 'required',
+      Type: 'required',
+      custName: 'required',
+      custDisplayName: 'required',
+      openingBalance: 'integer',
+      creditLimit: 'integer',
+      };
+    let validation = new Validator(data, rules);
+    if(validation.fails())
+    return res.status(200).send(validation.errors);
+    else{
+    var userData = await getUserDataByToken(req);
     let fields = req.fields;
-
-    let customers = new Customers(fields);
-    // handle image
-  
+     fields.OrgId = userData.OrgId;
+     fields.UserId = userData.UserId;
+    let customers = new Customers(fields);  
     customers.save((err, result) => {
       if (err) {
-        console.log("saving hotel err => ", err);
-        res.status(400).send(err.message);
+        res.status(500).send(err.message);
       }
-      res.json(result);
+      return res.json("Customer saved successfully");
     });
+  }
   } catch (err) {
     console.log(err);
-    res.status(400).json({
-      err: err.message,
+    res.status(500).json({
+      err,
     });
   }
 };
@@ -56,18 +69,30 @@
  export const update = async (req,res) => {
         console.log("req.update",req.fields);
   try {
+    let data = req.fields;
+    let rules = {
+      Custid: 'required',
+      Type: 'required',
+      custName: 'required',
+      custDisplayName: 'required',
+      openingBalance: 'integer',
+      creditLimit: 'integer',
+    };
+    let validation = new Validator(data, rules);
+    if(validation.fails())
+    return res.status(200).send(validation.errors);
+    else{
+    var userData = await getUserDataByToken(req);
     let fields = req.fields;
-
-
-  // let customers = new Customers(fields);
-  //  handle image
+     fields.OrgId = userData.OrgId;
+     fields.UserId = userData.UserId;
   let customers = await Customers.updateOne({
-     OrgId:req.fields.OrgId,
+     OrgId:fields.OrgId,
      Custid:fields.Custid
     },fields);
-
    console.log("Customer modified => ");
-   res.status(200).send("Customer Updated Successfully");
+   return res.status(200).send("Customer Updated Successfully");
+  }
   } catch (err) {
     console.log(err);
     res.status(400).json({
