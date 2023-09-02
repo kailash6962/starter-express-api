@@ -169,13 +169,12 @@ const sendOtpEmail = (email,name,otp) => {
 
 //SEND VERIFICATION EMAIL
 export const sendverifyemail = async (req,res) => {
-    console.log(req.body.email);
-    let users = await User.findOne({email:req.body.email,active:false}).exec();
+    console.log('req.body.email ',req.fields.email);
+    let users = await User.findOne({email:req.fields.email,active:0}).exec();
     console.log('users',users);
-
     if(users)
     {
-    var mailstatus = sendVerificationEmail(req.get('host'),req.body.email,users.register_token,users.name);
+    var mailstatus = sendVerificationEmail(req.get('host'),req.fields.email,users.register_token,users.name);
     res.status(200).send('Email Sent Successfully');
     }
     else{
