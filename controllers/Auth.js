@@ -170,7 +170,7 @@ const sendOtpEmail = (email,name,otp) => {
 //SEND VERIFICATION EMAIL
 export const sendverifyemail = async (req,res) => {
     console.log(req.body.email);
-    let users = await User.findOne({email:req.body.email,active:0}).exec();
+    let users = await User.findOne({email:req.body.email,active:false}).exec();
     console.log('users',users);
 
     if(users)
