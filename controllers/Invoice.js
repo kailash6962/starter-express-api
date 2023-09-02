@@ -166,6 +166,8 @@ export const read = async (req, res) => {
   filter.custCode = req.fields.custCode;
   if(req.fields.Status=='Pending')
   filter.Status = {$ne:'FullyPaid'};
+  if(req.fields.Status=='FullyPaid')
+  filter.Status = 'FullyPaid';
   try {
     let data = await Invoice.aggregate([
       {

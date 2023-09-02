@@ -78,7 +78,7 @@ export const register = async (req,res) => {
 export const sendVerificationEmail = (host,email,token,name) => {
     
     if(host=='localhost:'+process.env.PORT){
-        var hosturi = 'http://localhost:'+process.env.PORT+'/api';
+        var hosturi = process.env.SERVER_URL_DEV;
         }
         else{
             var hosturi = process.env.SERVER_URL_PROD;
