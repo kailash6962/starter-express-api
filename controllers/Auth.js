@@ -178,7 +178,7 @@ export const sendverifyemail = async (req,res) => {
     if(mailstatus)
     res.status(200).send('Email Sent Successfully');
     else
-    res.status(200).send('Failed to Send Email');
+    res.status(500).send('Failed to Send Email');
     }
     else{
         res.status(400).send('Entered Email Not Found');
