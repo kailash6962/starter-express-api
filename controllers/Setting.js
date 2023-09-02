@@ -23,10 +23,10 @@ var fs = require('fs');
     
     if(req.file!=undefined){
       obj.profile_img = {
-      data: fs.readFileSync(path.join(__dirname + '/../uploads/' + req.file.filename)),
+      data: fs.readFileSync(path.join(__dirname + '/../tmp/' + req.file.filename)),
       contentType: 'image/png'
       }
-      fs.unlinkSync(path.join(__dirname + '/../uploads/' + req.file.filename));
+      fs.unlinkSync(path.join(__dirname + '/../tmp/' + req.file.filename));
     }
     let userdata = await User.updateOne({UserId:UserId},obj); 
 
