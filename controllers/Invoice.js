@@ -221,7 +221,20 @@ export const readone = async (req, res) => {
           ],
           as: 'CustomerData'
         }
-      }
+      },
+      {
+        $lookup:
+        {
+          from: 'organizations',
+          localField: 'OrgId',
+          foreignField: 'OrgId',
+          "pipeline": [
+            { "$match": {"OrgId" : userData.OrgId} },
+            { $limit: 1 }
+          ],
+          as: 'OrganizationData'
+        }
+      },
   ]).exec();
     var invitems = await InvoiceItems.find({
       OrgId: userData.OrgId,

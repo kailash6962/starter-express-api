@@ -39,9 +39,13 @@ const OrganizationSchema = new Schema({
     {
         type: String,
     },
-    Address:
+    website:
     {
         type: String,
+    },
+    CompanyAddress:
+    {
+        type: Map,
     },
     custCode_prefix: {
         type: String,

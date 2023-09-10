@@ -48,9 +48,9 @@ var Validator = require('validatorjs');
 
 //READ ALL
 export const readall = async (req,res) => {
-  var userData = await getUserDataByToken(req);
-  var userOrgId = userData.OrgId;
   try {
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
      let product = await Product.find({OrgId:userOrgId}).exec();
      console.log(product);
        res.json(product);
@@ -88,7 +88,9 @@ export const createcode = async (req,res) => {
 //DELETE
 export const remove = async (req,res) => {
   try {
-       await Product.deleteOne({OrgId:req.query.SessionUser},{ProdId:req.query.ProdId}).exec();
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+       await Product.deleteOne({OrgId:userOrgId,ProdId:req.query.ProdId}).exec();
        res.status(200).json('Product deleted');
   } catch (err) {
     console.log(err);

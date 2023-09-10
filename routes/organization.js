@@ -22,7 +22,7 @@ const { requireSignin } = require("../middlewares");
 import {readall,update} from "../controllers/Organization";
 
 
-router.post('/systemorgsettings-update', upload.single('image'),update);//requireSignin, formidable(), upload.single('image'),
+router.post('/systemorgsettings-update',requireSignin,formidable(),update);//requireSignin, formidable(), upload.single('image'),
 //router.post('/systemsettings-create', requireSignin, formidable(), create);
 router.get('/systemorgsettings-read', requireSignin, formidable(), readall);
 

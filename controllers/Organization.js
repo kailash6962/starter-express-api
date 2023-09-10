@@ -1,16 +1,15 @@
 import Organization from '../models/Organization';
-
-
+import { getUserDataByToken } from "../controllers/Auth";
 var path = require('path');
 var fs = require('fs');
 
 
  export const update = async (req,res) => {        
-  let OrgId = req.body.OrgId;
    try {
-    let fields = req.body;
+    var userData = await getUserDataByToken(req);
+    var userOrgId = userData.OrgId;
+    let fields = req.fields;   
     var obj = fields;
-console.log('obj :11', obj);
     if(req.file!=undefined){
       obj.profile_img = {
       data: fs.readFileSync(path.join(__dirname + '/../tmp/' + req.file.filename)),
@@ -18,8 +17,7 @@ console.log('obj :11', obj);
       }
       fs.unlinkSync(path.join(__dirname + '/../tmp/' + req.file.filename));
     }
-    let userdata = await Organization.updateOne({OrgId:OrgId},obj); 
-
+    let userdata = await Organization.updateOne({OrgId:userOrgId},obj); 
         console.log("Organization Settings modified => ");
         res.status(200).send("Organization settings Updated Successfully");
   } catch (err) {
@@ -32,9 +30,10 @@ console.log('obj :11', obj);
 
 
 export const readall = async (req,res) => {
-  let SessionUser = req.query.OrgId;
   try {
-     let userdata = await Organization.find({OrgId:req.query.OrgId}).findOne();
+    var getuserData = await getUserDataByToken(req);
+    var userOrgId = getuserData.OrgId;
+     let userdata = await Organization.find({OrgId:userOrgId}).findOne();
     var obj = {
       OrgId: userdata.OrgId,
       name: userdata.name,
@@ -42,9 +41,11 @@ export const readall = async (req,res) => {
       custCode_prefix: userdata.custCode_prefix,
       company_name: userdata.company_name,
       mobile: userdata.mobile,
+      website: userdata.website,
       gstin: userdata.gstin,
       Address: userdata.Address,
       Industry: userdata.Industry,
+      CompanyAddress: userdata.CompanyAddress,
       imgdata: ((userdata.profile_img.data==null)?null:userdata.profile_img.data.toString('base64'))
     }
       return res.status(200).json(obj);
