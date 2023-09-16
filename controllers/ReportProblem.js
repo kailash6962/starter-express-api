@@ -20,7 +20,7 @@ export const report = async (req,res) => {
         console.log("saving err => ", err);
       }
       sendErrorEmailtoAdministrator(process.env.ADMIN_EMAIL_ADDRESS,process.env.ADMIN_NAME,result)
-      return res.status(200).json("Report sent successfully");
+      return res.status(200).json({message:"Report sent successfully",TicketId:result.ErrorReportId});
     });
   } catch (err) {
     console.log(err);
