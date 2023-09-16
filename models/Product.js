@@ -84,6 +84,9 @@ const ProductSchema = new Schema({
         trim: true,
         unique: false,
     },
+    expDate: {
+        type: Date,
+    },
     stockLocationCode: {
         type: String,
         trim: true,
