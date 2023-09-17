@@ -21,7 +21,7 @@ const { requireSignin } = require("../middlewares");
 //controllers
 import {
     report
-} from "../controllers/ReportProblem";
+} from "../controllers/Errors";
 
 router.post('/report-problem', requireSignin, formidable(), report);
 

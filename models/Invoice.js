@@ -62,7 +62,7 @@ const InvoiceSchema = new Schema({
         trim: true,
     },
     AmtTotal: {
-        type: String,
+        type: Number,
         trim: true,
         required : 'Invoice Total is required'
     },
@@ -83,7 +83,7 @@ const InvoiceSchema = new Schema({
         trim: true
     },
     AmtPaid: {
-        type: String,
+        type: Number,
         trim: true
     },
     LastPaymentDate: {
