@@ -64,6 +64,7 @@ export const generateReport = async (req, res) => {
         {
           $project: {
             _id: 0,
+            key: '$_id',
             custCode: '$_id',
             amountDue: 1,
             invoices: 1,
@@ -74,8 +75,19 @@ export const generateReport = async (req, res) => {
           },
         },
       ])
+      var overallData = result.reduce(
+        (accumulator, currentItem) => {
+          accumulator.totalAmountDue += currentItem.amountDue;
+          accumulator.totalInvoiceCount += currentItem.invoices.length;
+          return accumulator;
+        },
+        {
+          totalAmountDue: 0,
+          totalInvoiceCount: 0
+        }
+      );
     }
-    return res.status(200).json({data:result});
+    return res.status(200).json({data:result,overallData});
   } catch (err) {
     console.log(err);
     res.status(400).json({
