@@ -4,15 +4,7 @@ import { getUserDataByToken } from "../controllers/Auth";
 import Invoice from "../models/Invoice";
 import InvoiceItems from "../models/InvoiceItems";
 import Organization from "../models/Organization";
-import Staff from "../models/Staff";
-import Activitylog from "../models/Activitylog";
-import User from '../models/user';
-
-const jwt = require('jsonwebtoken');
-
-const Vonage = require("@vonage/server-sdk");
-
-const Models = require("../models/Invoice");
+import Product from '../models/Product';
 
 var Validator = require('validatorjs');
 
@@ -62,18 +54,37 @@ export const create = async (req, res) => {
       fields.Status = (fields.Status=='Draft')?"Draft":paymentStatus(fields.AmtTotal,fields.AmtPaid);
       let invoice = new Invoice(fields);
       var InvItems = fields.InvoiceItems;
+      var ProductNames = [];
       for (let i = 0; i < Object.keys(InvItems).length; ++i) {
         InvItems[i].Invid = fields.Invid;
         InvItems[i].UserId = fields.UserId;
         InvItems[i].OrgId = fields.OrgId;
         let newinvitems = new InvoiceItems(InvItems[i]);
-        newinvitems.save();
+        newinvitems.save((err, result) => {
+            if(!err){
+              console.log('err :62');
+              ProductNames.push(result.prodName);
+              Product.updateOne({
+                OrgId:fields.OrgId,
+                prodName:result.prodName
+               },{$inc: { stockCounts: - result.quantity }},
+               (err, updatedProduct) => {
+                 if (err)
+                   console.error('Error updating stockCounts:', err);
+                 else
+                   console.log('StockCounts updated successfully:', updatedProduct);
+               });
+            }
+            });
       }
       invoice.save((err, result) => {
         if (err) {
           console.log("saving err => ", err);
           res.status(500).send(failureResponse(err.message));
-        } else res.json(successResponse({invId:result.Invid,message:"Invoice created successfully"}));
+        } else {
+          // checkAndNotifyMinimumStock(ProductNames,userOrgId);
+          res.json(successResponse({invId:result.Invid,message:"Invoice created successfully"}));
+        }
       });
     } else res.status(500).send(failureResponse("Invalid Input"));
   }
@@ -302,4 +313,20 @@ const paymentStatus = (AmtTotal,AmtPaid) => {
     return "FullyPaid";
     else
     return ((parseFloat(AmtPaid)<1)?"UnPaid":"PartiallyPaid");
+}
+const checkAndNotifyMinimumStock = (Items,OrgId) => {
+  // const categoriesToMatch = ['Electronics', 'Clothing', 'Books'];
+  Product.find({
+       stockCounts: { $eq: '$minimumStockCounts' } , // First condition: col1 < col2
+       OrgId ,   // Second condition: col3 equals 'specificValue'
+       prodName: { $in: Items  }
+  })
+  .then((products) => {
+    console.log('Products in specified categories:', products);
+    return true;
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+    return true;
+  });
 }
