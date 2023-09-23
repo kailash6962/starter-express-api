@@ -88,7 +88,8 @@ export const generateReport = async (req, res) => {
           totalInvoiceCount: 0
         }
       );
-    } else if(reportType == 'ItemSales'){
+    }
+    if(reportType == 'ItemSales'){
       var result = await InvoiceItems.aggregate([
         {
           $lookup: {
@@ -122,6 +123,53 @@ export const generateReport = async (req, res) => {
       ])
       var overallData = {};
     }
+    if(reportType == 'InvoiceSummary'){
+      var result = await Invoice.aggregate([
+        {
+          $lookup: {
+            from: 'customers',
+            localField: 'custCode',
+            foreignField: 'Custid',
+            as: 'CustomerData',
+          },
+        },
+        {
+          $match: {
+            OrgId: userOrgId,
+            InvDate: obj,
+          },
+        },
+        {
+          $sort: { InvDate: -1 }
+        },
+        {
+          $project: {
+            _id: 0,
+            Adjustment: 1,
+            CustomerData: 1,
+            Invid: 1,
+            InvDate: 1,
+            SalesPerson: 1,
+            SubTotal: 1,
+            TaxValue: 1,
+            Discount: 1,
+            AmtTotal: 1,
+            Status: 1,
+          },
+        },
+      ])
+      var overallData = result.reduce(
+        (accumulator, currentItem) => {
+          accumulator.AmtTotal += currentItem.AmtTotal;
+          return accumulator;
+        },
+        {
+          AmtTotal: 0,
+        }
+      );
+      overallData.InvoicesCount = result.length;
+    }
+
     return res.status(200).json({data:result,overallData});
   } catch (err) {
     console.log(err);
