@@ -16,7 +16,7 @@ const InvoiceItemsSchema = new Schema({
         trim: true
     },
     rate: {
-        type: String,
+        type: Number,
         trim: true,
         required : 'price is required'
     },
@@ -25,12 +25,12 @@ const InvoiceItemsSchema = new Schema({
         trim: true,
     },
     quantity: {
-        type: String,
+        type: Number,
         trim: true,
         unique: false,
     },
     lineTotal: {
-        type: String,
+        type: Number,
         trim: true,
         unique: false,
     },

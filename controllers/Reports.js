@@ -1,5 +1,6 @@
 import { getUserDataByToken } from "../controllers/Auth";
 import Invoice from "../models/Invoice";
+import InvoiceItems from "../models/InvoiceItems";
 
 
 export const generateReport = async (req, res) => {
@@ -10,12 +11,13 @@ export const generateReport = async (req, res) => {
     var data = req.fields;
     var reportType = data.type;
     var filter = data.filter;
-    if (reportType == 'CustomerBalance') {
-      let obj = {};
+
+    let obj = {};
       if(filter.fromDate)
       obj.$gte= filter.fromDate;
       if(filter.toDate)
       obj.$lte= filter.toDate;
+    if (reportType == 'CustomerBalance') {
       var result = await Invoice.aggregate([
         {
           $match: {
@@ -86,6 +88,39 @@ export const generateReport = async (req, res) => {
           totalInvoiceCount: 0
         }
       );
+    } else if(reportType == 'ItemSales'){
+      var result = await InvoiceItems.aggregate([
+        {
+          $lookup: {
+            from: 'invoices', // The name of the Invoice collection
+            localField: 'Invid',
+            foreignField: 'Invid',
+            as: 'invoiceData',
+          },
+        },
+        {
+          $unwind: '$invoiceData', // Unwind the array created by $lookup
+        },
+        {
+          $match: {
+            OrgId: userOrgId,
+            'invoiceData.InvDate': obj,
+          },
+        },
+        {
+          $group: {
+            _id: '$prodName',
+            totalQuantity: { $sum: '$quantity' },
+            totalRevenue: { $sum: '$lineTotal' },
+            totalInvoiceCount: { $addToSet: '$Invid' },
+            InvCount: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { totalQuantity: -1 }
+        }
+      ])
+      var overallData = {};
     }
     return res.status(200).json({data:result,overallData});
   } catch (err) {
